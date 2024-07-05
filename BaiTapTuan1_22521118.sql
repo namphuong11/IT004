@@ -1,0 +1,91 @@
+﻿CREATE DATABASE QLBH
+--1.Tao cac quan he va khai bao cac khoa chinh, khoa ngoai cua quan he
+-- Tạo bảng KHACHHANG
+CREATE TABLE KHACHHANG 
+(
+  MAKH INT PRIMARY KEY,
+  HOTEN VARCHAR(255),
+  DCHI VARCHAR(255),
+  SODT VARCHAR(15),
+  NGSINH DATE,
+  DOANHSO DECIMAL(10, 2),
+  NGDK DATE
+)
+
+-- Tạo bảng NHANVIEN
+CREATE TABLE NHANVIEN 
+(
+  MANV INT PRIMARY KEY,
+  HOTEN VARCHAR(255),
+  NGVL DATE,
+  SODT VARCHAR(15)
+)
+
+-- Tạo bảng SANPHAM
+CREATE TABLE SANPHAM (
+  MASP INT PRIMARY KEY,
+  TENSP VARCHAR(255),
+  DVT VARCHAR(10),
+  NUOCSX VARCHAR(255),
+  GIA DECIMAL(10, 2)
+)
+
+-- Tạo bảng HOADON
+CREATE TABLE HOADON 
+(
+  SOHD INT PRIMARY KEY,
+  NGHD DATE,
+  MAKH INT,
+  MANV INT,
+  TRIGIA DECIMAL(10, 2),
+  FOREIGN KEY (MAKH) REFERENCES KHACHHANG(MAKH),
+  FOREIGN KEY (MANV) REFERENCES NHANVIEN(MANV)
+)
+
+-- Tạo bảng CTHD
+CREATE TABLE CTHD 
+(
+  SOHD INT,
+  MASP INT,
+  SL INT,
+  PRIMARY KEY (SOHD, MASP),
+  FOREIGN KEY (SOHD) REFERENCES HOADON(SOHD),
+  FOREIGN KEY (MASP) REFERENCES SANPHAM(MASP)
+)
+
+--2. Them vao thuoc tinh GHICHU co kieu du lieu varchar(20) cho quan he SANPHAM
+ALTER TABLE SANPHAM ADD GHICHU VARCHAR(20)
+
+--3. Them vao thuoc tinh LOAIKH co kieu du lieu tinyint cho quan he KHACHHANG
+ALTER TABLE KHACHHANG ADD LOAIKH TINYINT
+
+--4. Sua kieu du lieu cua thuoc tinh GHICHU trong quan he SANPHAM thanh varchar(100)
+ALTER TABLE SANPHAM ALTER COLUMN GHICHU VARCHAR(100)
+
+--5. Xoa thuoc tinh GHICHU trong quan he SANPHAM
+ALTER TABLE SANPHAM DROP COLUMN GHICHU
+
+--6. Thuoc tinh LOAIKH trong quan he KHACHHANG co the luu gia tri la : "Vang lai ","Thuong xuyen","Vip"
+CREATE TABLE LOAI_KHACHHANG (
+    LOAIKH TINYINT PRIMARY KEY,
+    TEN_LOAIKH VARCHAR(20)
+)
+
+-- Thêm các giá trị LOAIKH vào bảng LOAI_KHACHHANG
+INSERT INTO LOAI_KHACHHANG (LOAIKH, TEN_LOAIKH)
+VALUES (1, 'Vang lai'),
+       (2, 'Thuong xuyen'),
+       (3, 'Vip');
+
+-- Thêm khóa ngoại vào bảng KHACHHANG
+ALTER TABLE KHACHHANG ADD CONSTRAINT FK_LOAIKH FOREIGN KEY (LOAIKH) REFERENCES LOAI_KHACHHANG (LOAIKH)
+
+--7. Don vi tinh cua san pham chi co the la (“cay”,”hop”,”cai”,”quyen”,”chuc”)
+ALTER TABLE SANPHAM ADD CONSTRAINT CK_DVT CHECK (DVT IN ('cay', 'hop', 'cai', 'quyen', 'chuc'))
+
+--8. Gia ban cua san pham tu 500 dong tro len
+ALTER TABLE SANPHAM ADD CONSTRAINT CK_GIA CHECK (GIA>=500)
+
+
+--10. Ngay khach hang dang ki la khach hang thanh vien phai lon hon ngay sinh cua nguoi do 
+ALTER TABLE KHACHHANG ADD CONSTRAINT CK_NGDK CHECK (NGDK > NGSINH)
